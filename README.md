@@ -2,7 +2,7 @@
 
 App available at https://harmony.supply
 
-built upon: [locals-faucetserver](https://github.com/sponnet/locals-faucetserver) and [harmony-faucet](https://github.com/nglglhtr/harmony-faucet)
+built upon: [locals-faucetserver](https://github.com/sponnet/locals-faucetserver) and [polygon-faucet](https://github.com/TamtamHero/polygon-faucet)
 
 supports ONE transfers on Harmony mainnet
 
