@@ -1,54 +1,54 @@
-var express = require('express')
-const https = require('https')
-const fs = require('fs')
-const bodyParser = require('body-parser')
-const multer = require('multer') // v1.0.5
-const upload = multer() // for parsing multipart/form-data
-var cors = require("cors");
+var express = require('express');
+const http = require('http');
+const fs = require('fs');
+const bodyParser = require('body-parser');
+const multer = require('multer'); // v1.0.5
+const upload = multer(); // for parsing multipart/form-data
+var cors = require('cors');
 var app = express();
 //app.use(cors());
-app.use(bodyParser.json()) // for parsing application/json
-app.use(bodyParser.urlencoded())
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded());
 
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'https://matic.supply');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Origin', 'https://harmony.supply');
+    res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+    );
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-Requested-With,content-type'
+    );
     res.setHeader('Access-Control-Allow-Credentials', true);
     next();
 });
 
-https.createServer({
-    key: fs.readFileSync('privkey.pem'),
-    cert: fs.readFileSync('cert.pem'),
-    ca: fs.readFileSync('chain.pem')
-}, app).listen(3000, () => {
-    console.log('Listening...')
-})
+http.createServer(app).listen(5000, () => {
+    console.log('Listening...');
+});
 
-const axios = require("axios")
+const axios = require('axios');
 
-var Web3 = require("web3");
-var config = require("./config.json");
+var Web3 = require('web3');
+var config = require('./config.json');
 
-const mkdirp = require("mkdirp");
-const level = require("level");
+const mkdirp = require('mkdirp');
+const level = require('level');
 
-mkdirp.sync(require("os").homedir() + "/.maticfaucet/exceptions");
+mkdirp.sync(require('os').homedir() + '/.harmonyfaucet/exceptions');
 
 const dbEthExceptions = level(
-    require("os").homedir() + "/.maticfaucet/exceptions/eth"
+    require('os').homedir() + '/.harmonyfaucet/exceptions/eth'
 );
 
-const dbAddress = level(
-    require("os").homedir() + "/.maticfaucet/addresses"
-);
+const dbAddress = level(require('os').homedir() + '/.harmonyfaucet/addresses');
 
-const db = {}
-db['matic'] = dbEthExceptions
+const db = {};
+db['harmony'] = dbEthExceptions;
 
-const addr_db = {}
-addr_db['matic'] = dbAddress
+const addr_db = {};
+addr_db['harmony'] = dbAddress;
 
 const greylistduration = config.greylistdurationinsec * 1000; // time in ms
 const claimintervalinsec = config.claimintervalinsec * 1000; // time in ms
@@ -60,10 +60,10 @@ function isAddress(address) {
 
 // strip any spaces and add 0x
 function fixaddress(address) {
-    address = address.replace(" ", "");
+    address = address.replace(' ', '');
     address = address.toLowerCase();
-    if (!strStartsWith(address, "0x")) {
-        return "0x" + address;
+    if (!strStartsWith(address, '0x')) {
+        return '0x' + address;
     }
     return address;
 }
@@ -76,101 +76,102 @@ function strStartsWith(str, prefix) {
 let web3Objects = {};
 
 for (let network in config.networks) {
-    console.log(network)
-    let currentNetwork = config.networks[network]
-    console.log(currentNetwork.rpc)
-    console.log('connecting to', network)
-    web3 = new Web3(currentNetwork.rpc)
-    console.log('adding key')
-    web3.eth.accounts.wallet.add(currentNetwork.privateKey)
-    console.log('wallet addr=', web3.eth.accounts.wallet[0].address)
-    web3Objects[network] = web3
-    console.log('---')
+    console.log(network);
+    let currentNetwork = config.networks[network];
+    console.log(currentNetwork.rpc);
+    console.log('connecting to', network);
+    web3 = new Web3(currentNetwork.rpc);
+    console.log('adding key');
+    web3.eth.accounts.wallet.add(currentNetwork.privateKey);
+    console.log('wallet addr=', web3.eth.accounts.wallet[0].address);
+    web3Objects[network] = web3;
+    console.log('---');
 }
 
 function getEthBalance(web3) {
-    return (web3.eth.getBalance(web3.eth.accounts.wallet[0].address))
+    return web3.eth.getBalance(web3.eth.accounts.wallet[0].address);
 }
 
 function getAccountBalance(account) {
-    let web3 = web3Objects["rpc-mainnet"];
-    return (web3.eth.getBalance(account))
+    let web3 = web3Objects['rpc-mainnet'];
+    return web3.eth.getBalance(account);
 }
 
 async function getFaucetBalance() {
     let balances = [];
     for (let obj in web3Objects) {
-        let web3 = web3Objects[obj]
+        let web3 = web3Objects[obj];
 
-        let rEth = await getEthBalance(web3)
+        let rEth = await getEthBalance(web3);
 
         balances.push({
-            "network": web3.currentProvider.host.replace("https://", "").replace(".matic.network", ""),
-            "account": web3.eth.accounts.wallet[0].address,
-            "balanceEth": web3.utils.fromWei(rEth, 'ether')
+            network: web3.currentProvider.host
+                .replace('https://', '')
+                .replace('.harmony.network', ''),
+            account: web3.eth.accounts.wallet[0].address,
+            balanceEth: web3.utils.fromWei(rEth, 'ether'),
         });
     }
-    return balances
+    return balances;
 }
 
 async function getTokenInfo() {
-    let tokenInfo = []
+    let tokenInfo = [];
 
     for (let network in config.networks) {
-        let _payoutEth
+        let _payoutEth;
 
         tokenInfo.push({
             network: network,
             payoutEth: _payoutEth,
-        })
+        });
     }
 
-    return tokenInfo
+    return tokenInfo;
 }
-
 
 //frontend app serving directory
 // app.use(express.static("static/build"));
 
 app.get('/info', function (req, res) {
-    var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-    console.log("client IP=", ip);
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log('client IP=', ip);
     getFaucetBalance().then((r) => {
         res.status(200).json({
             checkfreqinsec: config.checkfreqinsec,
             greylistdurationinsec: config.greylistdurationinsec,
-            balances: r
-        })
-    })
-})
+            balances: r,
+        });
+    });
+});
 
 app.get('/tokenInfo', function (req, res) {
-    var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-    console.log("client IP=", ip);
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log('client IP=', ip);
     getTokenInfo().then((r) => {
         res.status(200).json({
-            tokenInfo: r
-        })
-    })
-})
+            tokenInfo: r,
+        });
+    });
+});
 
 function getException(address, token) {
     return new Promise((resolve, reject) => {
         db[token].get(address, function (err, value) {
             if (err) {
                 if (err.notFound) {
-                    return resolve()
+                    return resolve();
                 }
-                return reject(err)
+                return reject(err);
             }
-            value = JSON.parse(value)
+            value = JSON.parse(value);
             return resolve(value);
-        })
-    })
+        });
+    });
 }
 
 function setException(address, token) {
-    console.log("adding", address, "to greylist")
+    console.log('adding', address, 'to greylist');
     let claimCount = 1;
     return getException(address, token).then((exception) => {
         if (exception) {
@@ -183,7 +184,7 @@ function setException(address, token) {
                     created: Date.now(),
                     reason: 'greylist',
                     address: address,
-                    claimCount: claimCount
+                    claimCount: claimCount,
                 }),
                 function (err) {
                     if (err) {
@@ -191,8 +192,8 @@ function setException(address, token) {
                     }
                     resolve();
                 }
-            )
-        })
+            );
+        });
     });
 }
 
@@ -201,14 +202,14 @@ function getLogs(address, token) {
         addr_db[token].get(address, function (err, value) {
             if (err) {
                 if (err.notFound) {
-                    return resolve()
+                    return resolve();
                 }
-                return reject(err)
+                return reject(err);
             }
-            value = JSON.parse(value)
+            value = JSON.parse(value);
             return resolve(value);
-        })
-    })
+        });
+    });
 }
 
 function setLogs(ip, address, token) {
@@ -222,7 +223,7 @@ function setLogs(ip, address, token) {
                 address,
                 JSON.stringify({
                     ip: ip,
-                    claimCount: claimCount
+                    claimCount: claimCount,
                 }),
                 function (err) {
                     if (err) {
@@ -230,146 +231,151 @@ function setLogs(ip, address, token) {
                     }
                     resolve();
                 }
-            )
-        })
+            );
+        });
     });
 }
 
 function cleanupExceptions(token) {
-    var stream = db[token].createReadStream({
-        keys: true,
-        values: true
-    }).on("data", item => {
-        const value = JSON.parse(item.value);
-        if (value.created < Date.now() - greylistduration) {
-            db[token].del(item.key, err => {
-                console.log("removed ", item.key, "from greylist.");
-            })
-        }
-    })
+    var stream = db[token]
+        .createReadStream({
+            keys: true,
+            values: true,
+        })
+        .on('data', (item) => {
+            const value = JSON.parse(item.value);
+            if (value.created < Date.now() - greylistduration) {
+                db[token].del(item.key, (err) => {
+                    console.log('removed ', item.key, 'from greylist.');
+                });
+            }
+        });
 }
 
 // exception monitor
 setInterval(() => {
-    cleanupExceptions('matic')
+    cleanupExceptions('harmony');
 }, config.checkfreqinsec * 100);
 
 const axios_config = {
     headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
-}
+        'Content-Type': 'application/x-www-form-urlencoded',
+    },
+};
 
-app.get("/:network/:token/:address/:captcha", function (req, res) {
-    let captcha = req.params.captcha
-
-    const params = new URLSearchParams()
-    params.append('secret', config.hcaptchasecret)
-    params.append('response', captcha)
-
-    axios
-        .post("https://hcaptcha.com/siteverify", params, axios_config)
-        .then(response => {
-            if (response.status === 200 && response.data.success == true) {
-                var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-                console.log("client IP=", ip);
-                let network = req.params.network
-                let token = req.params.token
-                let address = req.params.address
-                let amount = config.networks[network].tokens[token].payoutamount
-                if (!isAddress(fixaddress(address))) {
-                    // invalid addr
-                    console.log("INVALID ADDR. 400")
-                    return res.status(400).json({
-                        msg: "invalid address."
-                    })
-                }
-                startTransfer(ip, address, token, amount, network).then((r) => {
-                    // successful transaction
-                    console.log("OK. 200")
-                    return res.status(200).json({
-                        hash: r
-                    });
-                }).catch(e => {
-                    // either tx error/ greylisted
-                    console.log("ERROR:500")
-                    console.log(e)
-                    return res.status(500).json({
-                        err: e
-                    });
-                })
-            }
-        });
-})
+app.get('/:network/:token/:address', function (req, res) {
+    const params = new URLSearchParams();
+    return res.status(200).json({
+        msg: 'valid',
+    });
+    // console.log('client IP=', ip);
+    // let network = req.params.network;
+    // let token = req.params.token;
+    // let address = req.params.address;
+    // let amount = config.networks[network].tokens[token].payoutamount;
+    // if (!isAddress(fixaddress(address))) {
+    //     // invalid addr
+    //     console.log('INVALID ADDR. 400');
+    //     return res.status(400).json({
+    //         msg: 'invalid address.',
+    //     });
+    // }
+    // startTransfer(ip, address, token, amount, network)
+    //     .then((r) => {
+    //         // successful transaction
+    //         console.log('OK. 200');
+    //         return res.status(200).json({
+    //             hash: r,
+    //         });
+    //     })
+    //     .catch((e) => {
+    //         // either tx error/ greylisted
+    //         console.log('ERROR:500');
+    //         console.log(e);
+    //         return res.status(500).json({
+    //             err: e,
+    //         });
+    //     });
+});
 
 async function startTransfer(ip, address, token, amount, network) {
-    let addressException = await getException(address, token)
-    let ipException = await getException(ip, token)
+    let addressException = await getException(address, token);
+    let ipException = await getException(ip, token);
 
-    let exception = addressException || ipException
+    let exception = addressException || ipException;
 
     if (exception && exception.claimCount >= 3) {
-        console.log(exception.address, "is on the greylist");
+        console.log(exception.address, 'is on the greylist');
         var values = {
             address: exception.address,
-            message: "This account has already received funds 3 times today, come back tomorrow",
-            duration: (exception.created + greylistduration) - Date.now()
-        }
-        return Promise.reject(values)
-    }
-    else if (exception && exception.created > Date.now() - claimintervalinsec) {
-        console.log(exception.address, "has aleady claimed in the past 15 minutes");
+            message:
+                'This account has already received funds 3 times today, come back tomorrow',
+            duration: exception.created + greylistduration - Date.now(),
+        };
+        return Promise.reject(values);
+    } else if (
+        exception &&
+        exception.created > Date.now() - claimintervalinsec
+    ) {
+        console.log(
+            exception.address,
+            'has aleady claimed in the past 15 minutes'
+        );
         var values = {
             address: exception.address,
-            message: "This account has already received funds in the last 15 minutes",
-            duration: (exception.created + claimintervalinsec) - Date.now()
-        }
-        return Promise.reject(values)
+            message:
+                'This account has already received funds in the last 15 minutes',
+            duration: exception.created + claimintervalinsec - Date.now(),
+        };
+        return Promise.reject(values);
     }
 
-    let balanceException = await getAccountBalance(address) >= config.networks[network].tokens[token].maxbalance;
+    let balanceException =
+        (await getAccountBalance(address)) >=
+        config.networks[network].tokens[token].maxbalance;
     if (balanceException) {
-        console.log(address, "has a too high balance");
+        console.log(address, 'has a too high balance');
         var values = {
-            message: "you already have a sufficient balance to use Polygon network",
-        }
-        return Promise.reject(values)
+            message:
+                'you already have a sufficient balance to use Polygon network',
+        };
+        return Promise.reject(values);
     }
 
-    let receipt = await _startTransfer(address, token, amount, network)
+    let receipt = await _startTransfer(address, token, amount, network);
 
-    await setException(address, token)
-    await setException(ip, token)
-    await setLogs(ip, address, token)
+    await setException(address, token);
+    await setException(ip, token);
+    await setLogs(ip, address, token);
 
-    return receipt
+    return receipt;
 }
 
 async function _startTransfer(address, token, amount, network) {
-    if (token === 'matic') return transferEth(address, amount, network)
+    if (token === 'one') return transferEth(address, amount, network);
 }
 
 async function transferEth(_to, _amount, network) {
-    console.log('---start tx---')
-    let web3 = web3Objects[network]
-    let _from = web3.eth.accounts.wallet[0].address
-    let _gasPrice = await web3.eth.getGasPrice();
-    let amt = (_amount * Math.pow(10, 18)).toString()
+    console.log('---start tx---');
+    let web3 = web3Objects[network];
+    let _from = web3.eth.accounts.wallet[0].address;
+    let amt = (_amount * Math.pow(10, 18)).toString();
     var options = {
         from: _from,
         to: _to,
         value: amt,
-        gas: 314150,
-        gasPrice: _gasPrice
-    }
+        gas: 25000,
+        gasPrice: 1,
+    };
     console.log(options.to);
-    let r = await web3.eth.sendTransaction(options)
+    let r = await web3.eth
+        .sendTransaction(options)
         .on('receipt', (receipt) => {
-            console.log('transfer successful!', receipt.transactionHash)
+            console.log('transfer successful!', receipt.transactionHash);
         })
         .on('error', (err) => {
             return Promise.reject(err);
-        })
-    console.log('---end tx---')
+        });
+    console.log('---end tx---');
     return Promise.resolve(r.transactionHash);
 }

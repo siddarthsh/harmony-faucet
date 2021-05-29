@@ -6,25 +6,24 @@
 
 .accordion {
     text-align: left;
-    font: Monaco,Consolas,"Andale  Mono","DejaVu Sans Mono",monospace;
+    font: Monaco, Consolas, 'Andale  Mono', 'DejaVu Sans Mono', monospace;
     border: 5px solid rgba(0, 0, 0, 0.1);
     border-radius: 2px;
-  }
+}
 
 @media only screen and (orientation: landscape) {
-  .accordion {
-    width: 70vw;
-    font-size: 1.2vw;
-  }
+    .accordion {
+        width: 70vw;
+        font-size: 1.2vw;
+    }
 }
 
 @media only screen and (orientation: portrait) {
-  .accordion {
-    width: 90vw;
-    font-size: 1.2vh;
-  }
+    .accordion {
+        width: 90vw;
+        font-size: 1.2vh;
+    }
 }
-
 
 .accordion__item + .accordion__item {
     border-top: 5px solid rgba(0, 0, 0, 0.1);
@@ -57,17 +56,17 @@
 }
 
 @media only screen and (orientation: landscape) {
-  .accordion__button:before {
-    height: 1vw;
-    width: 1vw;
-  }
+    .accordion__button:before {
+        height: 1vw;
+        width: 1vw;
+    }
 }
 
 @media only screen and (orientation: portrait) {
-  .accordion__button:before {
-    height: 1vh;
-    width: 1vh;
-  }
+    .accordion__button:before {
+        height: 1vh;
+        width: 1vh;
+    }
 }
 
 .accordion__button[aria-expanded='true']::before,
@@ -85,11 +84,11 @@
 }
 
 code {
-    color: #7CFC00;
+    color: #000;
 }
 
 a {
-  color: #7CFC00;
+    color: #000;
 }
 
 /* -------------------------------------------------- */

@@ -1,20 +1,20 @@
 {
-  "httpport": 3000,
-  "checkfreqinsec": 10,
-  "greylistdurationinsec": 120,
-  "claimintervalinsec": 1800,
-  "hcaptchasecret": "YOUR_HCAPTCHA_SECRET",
-  "networks": {
-    "rpc-mainnet": {
-      "rpc": "https://rpc-mainnet.matic.network",
-      "explorer": "https://explorer.matic.network",
-      "privateKey": "YOUR_PRIVATE_KEY",
-      "tokens": {
-        "matic": {
-          "payoutamount": 0.001,
-          "maxbalance": 1000000000000000
+    "httpport": 3000,
+    "checkfreqinsec": 10,
+    "greylistdurationinsec": 120,
+    "claimintervalinsec": 1800,
+    "hcaptchasecret": "0xEE53171E8B8E052d6976dBDBA076028dda237c96",
+    "networks": {
+        "rpc-mainnet": {
+            "rpc": "https://api.s0.t.hmny.io",
+            "explorer": "https://explorer.harmony.one/#/address/",
+            "privateKey": "0x930a5d0b6568925e8f78d0fa2ae72a2677a2c882d44ead2cc5355c05409466bd",
+            "tokens": {
+                "one": {
+                    "payoutamount": 0.00001,
+                    "maxbalance": 1000000000000000
+                }
+            }
         }
-      }
     }
-  }
 }
